@@ -154,13 +154,14 @@ def write_to_csv_results(dataset_mode, img_num, captions):
     base_dir = os.path.join(os.path.expanduser('~'),'experiments/capdec')
     style_map = {2:'humor', 3:'romantic', 2.5: 'positive', 3.5: 'negative'}
     res_file_path = os.path.join(base_dir,f'res_{style_map[dataset_mode]}.csv')
+    print(f'writing results into {res_file_path}...')
     with open(res_file_path,'w') as f:
         writer = csv.writer(f)
         title = ['img_num',style_map[dataset_mode]]
         writer.writerow(title)
         for i in range(len(img_num)):
             writer.writerow([img_num[i], captions[i]])
-
+    print('finished to write results.')
 
 def make_preds(data, model: ClipCaptionModel, out_path, tokenizer, dataset_mode, args=None):
     device = CUDA(0)
@@ -213,26 +214,17 @@ def make_preds(data, model: ClipCaptionModel, out_path, tokenizer, dataset_mode,
     # if True:#todo:remove
     img_num = []
     captions = []
-    for ii, d in enumerate(data): #todo: remove coment this line
-    # for ii, d in enumerate(data): #todo: remove coment this line
-        if ii==5: #todo
-            break
+    for ii, d in enumerate(data):
         img_id = d["image_id"]
         if dataset_mode == 0 or dataset_mode == 7 or dataset_mode == 8:
             filename = f'{images_root}/COCO_val2014_{int(img_id):012d}.jpg'
         elif dataset_mode == 6:
             filename = f'{images_root}/COCO_train2014_{int(img_id):012d}.jpg'
         elif dataset_mode == 1 or dataset_mode == 4 or dataset_mode == 2 or dataset_mode == 3 or dataset_mode == 2.5 or dataset_mode == 3.5:
-            ##########todo: daniela
-            # filename = os.path.join(os.path.expanduser('~'), 'data/flickrstyle10k/images/test',
-            #                         '3637013_c675de7705.jpg')
-            ##########todo: daniela
             filename = d["filename"] #todo: remove coment this line
             filename = f'{images_root}/{filename}' #todo: remove coment this line
-
         elif dataset_mode == 5:
             filename = 'no need for filename, yay!!1'
-
         if not os.path.isfile(filename) and dataset_mode != 5:
             skips += 1
             print('skips=', skips, " filename=", filename)

@@ -260,6 +260,13 @@ class ClipCaptionModel(nn.Module):
             labels = torch.cat((dummy_token, tokens), dim=1)
         out = self.gpt(inputs_embeds=embedding_cat, labels=labels, attention_mask=mask)
         return out
+        #######
+        # for name, param in self.gpt.named_parameters():
+        #     if not param.requires_grad:
+        #         print(f'{name} is frozen')
+        #     else:
+        #         print(f'{name} is not frozen')
+        #####
 
     def __init__(self, prefix_length: int, clip_length: Optional[int] = None, prefix_size: int = 512,
                  num_layers: int = 8, mapping_type: MappingType = MappingType.MLP):
@@ -430,7 +437,7 @@ def main():
     args = parser.parse_args()
 
     wandb.init(project='capdec',
-               mode='online',  # disabled, offline, online'
+               mode='disabled',  # disabled, offline, online'
                )
 
 
