@@ -1,3 +1,4 @@
+import csv
 import sys
 sys.path.append("/home/amir/projects/CLIP")
 from transformers import GPT2Tokenizer
@@ -149,6 +150,17 @@ class Timer:
         std_syn = np.std(self.timings)
         return f"mean: {mean_syn:.2f} ms, std: {std_syn:.2f} ms"
 
+def write_to_csv_results(dataset_mode, img_num, captions):
+    base_dir = os.path.join(os.path.expanduser('~'),'experiments/capdec')
+    style_map = {2:'humor', 3:'romantic', 2.5: 'positive', 3.5: 'negative'}
+    res_file_path = os.path.join(base_dir,f'res_{style_map[dataset_mode]}.csv')
+    with open(res_file_path,'w') as f:
+        writer = csv.writer(f)
+        title = ['img_num',style_map[dataset_mode]]
+        writer.writerow(title)
+        for i in range(len(img_num)):
+            writer.writerow([img_num[i], captions[i]])
+
 
 def make_preds(data, model: ClipCaptionModel, out_path, tokenizer, dataset_mode, args=None):
     device = CUDA(0)
@@ -171,7 +183,10 @@ def make_preds(data, model: ClipCaptionModel, out_path, tokenizer, dataset_mode,
     elif dataset_mode == 1:
         images_root = '/home/gamir/DER-Roei/davidn/flicker30/flickr30k_images'
     elif dataset_mode == 2 or dataset_mode == 3 or dataset_mode == 4:
-        images_root = '/home/gamir/DER-Roei/davidn/flicker8kforStyle/Images'
+        # images_root = '/home/gamir/DER-Roei/davidn/flicker8kforStyle/Images' #todo:
+        images_root = os.path.join(os.path.expanduser('~'),'data/flickrstyle10k/images/test')
+    elif dataset_mode == 2.5 or dataset_mode == 3.5:
+        images_root = os.path.join(os.path.expanduser('~'),'data/senticap/images/test')
     elif dataset_mode == 6:
         images_root = '/home/gamir/DER-Roei/davidn/CLIP_prefix_caption/data/coco/train2014'
         images_root = '../myprivate_coco/train2014'
@@ -191,15 +206,30 @@ def make_preds(data, model: ClipCaptionModel, out_path, tokenizer, dataset_mode,
     results = []
     ablation_image_dist_stat = {'counter': 0, 'L2': 0.0}
     timer = Timer()
-    for ii, d in enumerate(data):
+
+    # data={"image_id":0}#todo:remove
+    # d={"image_id":0}#todo:remove
+    # ii=0 #todo:remove
+    # if True:#todo:remove
+    img_num = []
+    captions = []
+    for ii, d in enumerate(data): #todo: remove coment this line
+    # for ii, d in enumerate(data): #todo: remove coment this line
+        if ii==5: #todo
+            break
         img_id = d["image_id"]
         if dataset_mode == 0 or dataset_mode == 7 or dataset_mode == 8:
             filename = f'{images_root}/COCO_val2014_{int(img_id):012d}.jpg'
         elif dataset_mode == 6:
             filename = f'{images_root}/COCO_train2014_{int(img_id):012d}.jpg'
-        elif dataset_mode == 1 or dataset_mode == 4 or dataset_mode == 2 or dataset_mode == 3:
-            filename = d["filename"]
-            filename = f'{images_root}/{filename}'
+        elif dataset_mode == 1 or dataset_mode == 4 or dataset_mode == 2 or dataset_mode == 3 or dataset_mode == 2.5 or dataset_mode == 3.5:
+            ##########todo: daniela
+            # filename = os.path.join(os.path.expanduser('~'), 'data/flickrstyle10k/images/test',
+            #                         '3637013_c675de7705.jpg')
+            ##########todo: daniela
+            filename = d["filename"] #todo: remove coment this line
+            filename = f'{images_root}/{filename}' #todo: remove coment this line
+
         elif dataset_mode == 5:
             filename = 'no need for filename, yay!!1'
 
@@ -230,6 +260,9 @@ def make_preds(data, model: ClipCaptionModel, out_path, tokenizer, dataset_mode,
             generated_text_prefix = generate_beam(model, tokenizer, embed=prefix_embed)[0]
         else:
             generated_text_prefix = generate2(model, tokenizer, embed=prefix_embed)
+        # print("****************************************") #todo:daniela
+        # print(f"generated_text_prefix: {generated_text_prefix}")
+        # print("****************************************")
         timer.__exit__()
         results.append((img_id, d["caption"], generated_text_prefix.lower()))
         if args.ablation_dist:
@@ -300,6 +333,10 @@ def make_preds(data, model: ClipCaptionModel, out_path, tokenizer, dataset_mode,
         d["caption"] = generated_text_prefix.lower()
         new_data.append({"caption": generated_text_prefix.lower(), "image_id": d["image_id"]})
 
+        img_num.append(d["filename"].split('.')[0])
+        captions.append(generated_text_prefix.lower())
+    write_to_csv_results(dataset_mode, img_num, captions)
+
     if args.ablation_dist:
         # calculate the distance between the 5 prefixes
         distances, distances_l2, data_size = [], [], 0
@@ -354,13 +391,23 @@ def load_data(dataset_mode):
                 'r') as f:
             data = json.load(f)
     elif dataset_mode == 2:
-        with open(
-                f'/home/gamir/DER-Roei/davidn/flicker8kforStyle/postprocessed_style_data/humor_test.json',
+        with open(#
+                os.path.join(os.path.expanduser('~'),'data/capdec/postprocessed_style_data','humor_test.json'),
                 'r') as f:
             data = json.load(f)
     elif dataset_mode == 3:
         with open(
-                f'/home/gamir/DER-Roei/davidn/flicker8kforStyle/postprocessed_style_data/roman_test.json',
+                os.path.join(os.path.expanduser('~'), 'data/capdec/postprocessed_style_data', 'roman_test.json'),
+                'r') as f:
+            data = json.load(f)
+    elif dataset_mode == 2.5:
+        with open(#
+                os.path.join(os.path.expanduser('~'),'data/capdec/postprocessed_style_data','positive_test.json'),
+                'r') as f:
+            data = json.load(f)
+    elif dataset_mode == 3.5:
+        with open(
+                os.path.join(os.path.expanduser('~'), 'data/capdec/postprocessed_style_data', 'negative_test.json'),
                 'r') as f:
             data = json.load(f)
     elif dataset_mode == 4:
@@ -410,6 +457,7 @@ def load_data(dataset_mode):
     print("sample example: ", data[0])
     return data
 
+#python predictions_runner.py  --models/015.pt --dataset_mode 2
 
 def main():
     print('start....')
@@ -424,7 +472,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--checkpoint', default=f'./checkpoints/coco_prefix_t10_rn-006.pt')
     parser.add_argument('--out', default='')
-    parser.add_argument('--dataset_mode', type=int, default=0)  # 0 for coco val, 1 for flicker30, 2 humor style,3 romantic,4 factual of style, 5 coco val text only, 6 coco train, 7 coco val for womanSnowboard_for_creating_capdec_preds
+    parser.add_argument('--dataset_mode', type=float, default=0)  # 0 for coco val, 1 for flicker30, 2 humor style,3 romantic,4 factual of style, 5 coco val text only, 6 coco train, 7 coco val for womanSnowboard_for_creating_capdec_preds
     parser.add_argument('--modality_bridger', dest='modality_bridger', action='store_true', default=False)
     parser.add_argument('--beam', dest='beam', action='store_true', default=True)
     parser.add_argument('--is_rn', dest='is_rn', action='store_true', default=True)
@@ -442,7 +490,9 @@ def main():
     print(f'beam search = {args.beam}')
     if args.text_autoencoder:
         args.dataset_mode = 5
-    data = load_data(dataset_mode=args.dataset_mode)
+
+    # data = ''#remove
+    data = load_data(dataset_mode=args.dataset_mode)#todo: remove commet this line
     name = args.checkpoint.split("/")[-1].split(".")[0] + ('add_modality_offset' if args.add_modality_offset else '')
     checkpoint_dir = '/'.join(args.checkpoint.split("/")[:-1])
     out_path = f"{checkpoint_dir}/{name}.json" if (args.out == '') else args.out

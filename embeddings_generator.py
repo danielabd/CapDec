@@ -111,10 +111,12 @@ def main(clip_model_type, clip_model_name, out_path, annotations_path, images_pa
 def run_main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--clip_model_type', default="RN50x4", choices=('RN50', 'RN101', 'RN50x4', 'ViT-B/32'))
-    parser.add_argument('--dataset_mode', type=float, default=0.0)  # 0 for COCO!!, 1 for flicker30, 2 humor style,3 romantic,4 factual of style,6 harrypotter, 7 for news.
+    # parser.add_argument('--dataset_mode', type=float, default=0.0)  # 0 for COCO!!, 1 for flicker30, 2 humor style,3 romantic,4 factual of style,6 harrypotter, 7 for news.
+    parser.add_argument('--dataset_mode', type=float, default=3)  # 0 for COCO!!, 1 for flicker30, 2 humor style,3 romantic,4 factual of style,6 harrypotter, 7 for news.  2.5 positive style, 3.5 negative style
     parser.add_argument('--fix_gender_imbalance_mode', type=int, default=0)  # 1 for both genders, 2 for man only, 3 for woman only
     args = parser.parse_args()
     clip_model_name = args.clip_model_type.replace('/', '_')
+    data_split = 'val' # 'train','val
     if args.dataset_mode == 0:
         out_path = f"./data/coco/verified_split_COCO_train_set.pkl"
         if add_text_embedding:
@@ -144,20 +146,39 @@ def run_main():
         annotations_path = f"/home/gamir/DER-Roei/davidn/flicker30/dataset_flickr30k_correct_format.jsonvalidation"
         images_path = f"/home/gamir/DER-Roei/davidn/flicker30/flickr30k_images/"
     elif args.dataset_mode == 2:
-        out_path = f"./data/styleHumor_{clip_model_name}_train.pkl"
+        out_path = os.path.join(os.path.expanduser('~'), 'projects/CapDec',
+                                f"data/styleHumor_{clip_model_name}_{data_split}.pkl")
         if add_text_embedding:
-            out_path = f"./data/styleHumor_{clip_model_name}_train_with_text_embeddings_not_norm.pkl"
+            out_path = os.path.join(os.path.expanduser('~'), 'projects/CapDec',
+                                    f"data/styleHumor_{clip_model_name}_{data_split}_with_text_embeddings_not_norm.pkl")
             print(f'Text embeddings will be added to the dataset')
-        annotations_path = f"/home/gamir/DER-Roei/davidn/flicker8kforStyle/postprocessed_style_data/humor_train.json"
-        images_path = f'/home/gamir/DER-Roei/davidn/flicker8kforStyle/Images/'
-
+        annotations_path = os.path.join(os.path.expanduser('~'),'data/capdec/postprocessed_style_data',f'humor_{data_split}.json') #todo: adniela
+        images_path = os.path.join(os.path.expanduser('~'),'data/flickrstyle10k/images/') #todo: adniela
     elif args.dataset_mode == 3:
-        out_path = f"./data/styleRoman_{clip_model_name}_train.pkl"
+        out_path = os.path.join(os.path.expanduser('~'), 'projects/CapDec',f"/data/styleRoman_{clip_model_name}_{data_split}.pkl")
         if add_text_embedding:
-            out_path = f"./data/styleRoman_{clip_model_name}_train_with_text_embeddings_not_norm.pkl"
+            out_path = os.path.join(os.path.expanduser('~'), 'projects/CapDec',f"data/styleRoman_{clip_model_name}_{data_split}_with_text_embeddings_not_norm.pkl")
             print(f'Text embeddings will be added to the dataset')
-        annotations_path = f"/home/gamir/DER-Roei/davidn/flicker8kforStyle/postprocessed_style_data/roman_train.json"
-        images_path = f'/home/gamir/DER-Roei/davidn/flicker8kforStyle/Images/'
+        annotations_path = os.path.join(os.path.expanduser('~'), 'data/capdec/postprocessed_style_data',
+                                        f'roman_{data_split}.json')  # todo: adniela
+        images_path = os.path.join(os.path.expanduser('~'), 'data/flickrstyle10k/images/')  # todo: adniela
+    elif args.dataset_mode == 2.5:
+        out_path = os.path.join(os.path.expanduser('~'), 'projects/CapDec',
+                                f"data/stylePositive_{clip_model_name}_{data_split}.pkl")
+        if add_text_embedding:
+            out_path = os.path.join(os.path.expanduser('~'), 'projects/CapDec',
+                                    f"data/stylePositive_{clip_model_name}_{data_split}_with_text_embeddings_not_norm.pkl")
+            print(f'Text embeddings will be added to the dataset')
+        annotations_path = os.path.join(os.path.expanduser('~'),'data/capdec/postprocessed_style_data',f'positive_{data_split}.json') #todo: adniela
+        images_path = os.path.join(os.path.expanduser('~'),'data/senticap/images/') #todo: adniela
+    elif args.dataset_mode == 3.5:
+        out_path = os.path.join(os.path.expanduser('~'), 'projects/CapDec',f"/data/styleNegative_{clip_model_name}_{data_split}.pkl")
+        if add_text_embedding:
+            out_path = os.path.join(os.path.expanduser('~'), 'projects/CapDec',f"data/styleNegative_{clip_model_name}_{data_split}_with_text_embeddings_not_norm.pkl")
+            print(f'Text embeddings will be added to the dataset')
+        annotations_path = os.path.join(os.path.expanduser('~'), 'data/capdec/postprocessed_style_data',
+                                        f'negative_{data_split}.json')  # todo: adniela
+        images_path = os.path.join(os.path.expanduser('~'), 'data/senticap/images/')  # todo: adniela
     elif args.dataset_mode == 4:
         out_path = f"./data/styleFactual_{clip_model_name}_train.pkl"
         if add_text_embedding:
