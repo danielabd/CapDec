@@ -160,7 +160,8 @@ def write_to_csv_results(dataset_mode, img_num, captions):
         title = ['img_num',style_map[dataset_mode]]
         writer.writerow(title)
         for i in range(len(img_num)):
-            writer.writerow([img_num[i], captions[i]])
+            row = [img_num[i], captions[i]]
+            writer.writerow(row)
     print('finished to write results.')
 
 def make_preds(data, model: ClipCaptionModel, out_path, tokenizer, dataset_mode, args=None):
@@ -215,6 +216,8 @@ def make_preds(data, model: ClipCaptionModel, out_path, tokenizer, dataset_mode,
     img_num = []
     captions = []
     for ii, d in enumerate(data):
+        # if ii>=10:
+        #     break
         img_id = d["image_id"]
         if dataset_mode == 0 or dataset_mode == 7 or dataset_mode == 8:
             filename = f'{images_root}/COCO_val2014_{int(img_id):012d}.jpg'
@@ -222,6 +225,11 @@ def make_preds(data, model: ClipCaptionModel, out_path, tokenizer, dataset_mode,
             filename = f'{images_root}/COCO_train2014_{int(img_id):012d}.jpg'
         elif dataset_mode == 1 or dataset_mode == 4 or dataset_mode == 2 or dataset_mode == 3 or dataset_mode == 2.5 or dataset_mode == 3.5:
             filename = d["filename"] #todo: remove coment this line
+                # ######todo
+                # if '3535056297_e16f014cb7' in filename:
+                #     continue
+                # ######todo
+
             filename = f'{images_root}/{filename}' #todo: remove coment this line
         elif dataset_mode == 5:
             filename = 'no need for filename, yay!!1'
@@ -253,7 +261,7 @@ def make_preds(data, model: ClipCaptionModel, out_path, tokenizer, dataset_mode,
         else:
             generated_text_prefix = generate2(model, tokenizer, embed=prefix_embed)
         # print("****************************************") #todo:daniela
-        # print(f"generated_text_prefix: {generated_text_prefix}")
+        # print(f"ii = {ii}, generated_text_prefix: {generated_text_prefix}")
         # print("****************************************")
         timer.__exit__()
         results.append((img_id, d["caption"], generated_text_prefix.lower()))
@@ -326,7 +334,7 @@ def make_preds(data, model: ClipCaptionModel, out_path, tokenizer, dataset_mode,
         new_data.append({"caption": generated_text_prefix.lower(), "image_id": d["image_id"]})
 
         img_num.append(d["filename"].split('.')[0])
-        captions.append(generated_text_prefix.lower())
+        captions.append(generated_text_prefix.lower().replace('\n',''))
     write_to_csv_results(dataset_mode, img_num, captions)
 
     if args.ablation_dist:
