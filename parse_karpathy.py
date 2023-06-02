@@ -5,6 +5,7 @@ kagle_json = 'annotations/dataset_coco_from_kaggle.json'
 new_json_train = 'post_processed_karpthy_coco/train.json'
 new_json_test = 'post_processed_karpthy_coco/test.json'
 new_json_val = 'post_processed_karpthy_coco/val.json'
+None_captions = 'None'
 
 
 def map_format_kaggle_to_clipcap():
@@ -145,7 +146,7 @@ def map_format_flickrstyle10k_to_clipcap():
                     else:
                         continue
                 else: #take all tests even they don't have caption of this style
-                    correct_format = {"image_id": int(imgid), "id": i,
+                    correct_format = {"image_id": int(imgid),"caption": None_captions, "id": i,
                                       "filename": ds[split][im]['image_path'].split('/')[-1]}
                 i+=1
                 splits[split].append(correct_format)
