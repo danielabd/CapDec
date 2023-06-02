@@ -139,10 +139,14 @@ def map_format_flickrstyle10k_to_clipcap():
         for split in ds:
             for im in ds[split]:
                 imgid = extract_imgid_from_name(im,dataset)
-                if len(ds[split][im][style])>0:
-                    correct_format = {"image_id": int(imgid), "caption": ds[split][im][style][0], "id": i, "filename": ds[split][im]['image_path'].split('/')[-1]}
-                else:
-                    continue
+                if split != 'test':
+                    if len(ds[split][im][style])>0:
+                        correct_format = {"image_id": int(imgid), "caption": ds[split][im][style][0], "id": i, "filename": ds[split][im]['image_path'].split('/')[-1]}
+                    else:
+                        continue
+                else: #take all tests even they don't have caption of this style
+                    correct_format = {"image_id": int(imgid), "id": i,
+                                      "filename": ds[split][im]['image_path'].split('/')[-1]}
                 i+=1
                 splits[split].append(correct_format)
 

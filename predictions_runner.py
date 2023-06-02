@@ -459,6 +459,21 @@ def load_data(dataset_mode):
 
 #python predictions_runner.py  --models/015.pt --dataset_mode 2
 
+
+
+def replace_user_home_dir(path):
+    if str(path)[0] == '~':
+        path = os.path.join(os.path.expanduser('~'), path[2:])
+    elif str(path).split('/')[1] == 'Users':
+        path = os.path.join(os.path.expanduser('~'), "/".join(path.split('/')[3:]))
+    elif '/' in str(path) and str(path).split('/')[1] == 'home':
+        if str(path).split('/')[2] == 'bdaniela':
+            path = os.path.join(os.path.expanduser('~'), "/".join(path.split('/')[3:]))
+        else:
+            path = os.path.join(os.path.expanduser('~'), "/".join(path.split('/')[4:]))
+    return path
+
+
 def main():
     print('start....')
     tokenizer = GPT2Tokenizer.from_pretrained("gpt2")
@@ -480,7 +495,7 @@ def main():
     parser.add_argument('--text_autoencoder', dest='text_autoencoder', action='store_true', default=False)
     parser.add_argument('--add_modality_offset', dest='add_modality_offset', action='store_true', default=False)
     parser.add_argument('--ablation_dist', dest='ablation_dist', action='store_true', default=False)  # need to use dataset_mode=5 to use only text
-    parser.add_argument('--ablation_image_dist', dest='ablation_image_dist', action='store_true', default=False)
+    # parser.add_argument('--ablation_image_dist', dest='ablation_image_dist', action='store_true', default=False)
     parser.add_argument('--prefix_length', type=int, default=40)
     parser.add_argument('--num_layers', type=int, default=8)
     parser.add_argument('--prefix_length_clip', type=int, default=40)
@@ -499,6 +514,7 @@ def main():
     print(f'out_path = {out_path}, dataset_mode = {args.dataset_mode}')
 
     out_dir = '/'.join(out_path.split('/')[:-1])
+    out_dir = replace_user_home_dir(out_dir)
     with open(f'{out_dir}/commandline_args.txt', 'w') as f:
         json.dump(args.__dict__, f, indent=2)
         print(f'args saved to file {out_dir}/pred_commandline_args.txt')
@@ -508,6 +524,7 @@ def main():
                     'transformer_decoder': MappingType.TransformerDecoder}[args.mapping_type]
     model = ClipCaptionModel(args.prefix_length, prefix_dim=prefix_dim, clip_length=args.prefix_length_clip,
                               mapping_type=mapping_type, num_layers=args.num_layers)
+    args.checkpoint = replace_user_home_dir(args.checkpoint)
     model.load_state_dict(torch.load(args.checkpoint, map_location=CUDA(0)))  # FIXME
     print(args.checkpoint)
     print(f'modality_offset={args.add_modality_offset}')
