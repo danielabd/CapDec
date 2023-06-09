@@ -152,7 +152,7 @@ class Timer:
 
 def write_to_csv_results(dataset_mode, img_num, captions):
     base_dir = os.path.join(os.path.expanduser('~'),'experiments/capdec')
-    style_map = {2:'humor', 3:'romantic', 2.5: 'positive', 3.5: 'negative'}
+    style_map = {2:'humor', 3:'romantic', 2.5: 'positive', 3.5: 'negative',  10: 'val_positive', 11: 'val_negative'}
     res_file_path = os.path.join(base_dir,f'res_{style_map[dataset_mode]}.csv')
     print(f'writing results into {res_file_path}...')
     with open(res_file_path,'w') as f:
