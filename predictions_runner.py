@@ -189,6 +189,8 @@ def make_preds(data, model: ClipCaptionModel, out_path, tokenizer, dataset_mode,
         images_root = os.path.join(os.path.expanduser('~'),'data/flickrstyle10k/images/test')
     elif dataset_mode == 2.5 or dataset_mode == 3.5:
         images_root = os.path.join(os.path.expanduser('~'),'data/senticap/images/test')
+    elif dataset_mode == 10 or dataset_mode == 11:
+        images_root = os.path.join(os.path.expanduser('~'),'data/senticap/images/val')
     elif dataset_mode == 6:
         images_root = '/home/gamir/DER-Roei/davidn/CLIP_prefix_caption/data/coco/train2014'
         images_root = '../myprivate_coco/train2014'
@@ -383,7 +385,7 @@ def load_data(dataset_mode):
     if dataset_mode == 0:
         with open(
                 f'/home/gamir/DER-Roei/davidn/myprivate_coco/annotations/single_caption_per_sample_val.json',
-                'r') as f:
+                    'r') as f:
             data = json.load(f)
     elif dataset_mode == 1:
         with open(
@@ -410,6 +412,17 @@ def load_data(dataset_mode):
                 os.path.join(os.path.expanduser('~'), 'data/capdec/postprocessed_style_data', 'negative_test.json'),
                 'r') as f:
             data = json.load(f)
+    elif dataset_mode == 10:
+        with open(#
+                os.path.join(os.path.expanduser('~'),'data/capdec/postprocessed_style_data','positive_val.json'),
+                'r') as f:
+            data = json.load(f)
+    elif dataset_mode == 11:
+        with open(
+                os.path.join(os.path.expanduser('~'), 'data/capdec/postprocessed_style_data', 'negative_val.json'),
+                'r') as f:
+            data = json.load(f)
+
     elif dataset_mode == 4:
         with open(
                 f'/home/gamir/DER-Roei/davidn/flicker8kforStyle/postprocessed_style_data/factual_test.json',
@@ -487,7 +500,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--checkpoint', default=f'./checkpoints/coco_prefix_t10_rn-006.pt')
     parser.add_argument('--out', default='')
-    parser.add_argument('--dataset_mode', type=float, default=0)  # 0 for coco val, 1 for flicker30, 2 humor style,3 romantic,4 factual of style, 5 coco val text only, 6 coco train, 7 coco val for womanSnowboard_for_creating_capdec_preds
+    parser.add_argument('--dataset_mode', type=float, default=0)  # 0 for coco val, 1 for flicker30, 2 humor style,3 romantic,4 factual of style, 5 coco val text only, 6 coco train, 7 coco val for womanSnowboard_for_creating_capdec_preds, 10 pos_val, 11 neg_val
     parser.add_argument('--modality_bridger', dest='modality_bridger', action='store_true', default=False)
     parser.add_argument('--beam', dest='beam', action='store_true', default=True)
     parser.add_argument('--is_rn', dest='is_rn', action='store_true', default=True)
