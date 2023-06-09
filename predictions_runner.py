@@ -225,7 +225,7 @@ def make_preds(data, model: ClipCaptionModel, out_path, tokenizer, dataset_mode,
             filename = f'{images_root}/COCO_val2014_{int(img_id):012d}.jpg'
         elif dataset_mode == 6:
             filename = f'{images_root}/COCO_train2014_{int(img_id):012d}.jpg'
-        elif dataset_mode == 1 or dataset_mode == 4 or dataset_mode == 2 or dataset_mode == 3 or dataset_mode == 2.5 or dataset_mode == 3.5:
+        elif dataset_mode == 1 or dataset_mode == 4 or dataset_mode == 2 or dataset_mode == 3 or dataset_mode == 2.5 or dataset_mode == 3.5 or dataset_mode == 10 or dataset_mode == 11:
             filename = d["filename"] #todo: remove coment this line
                 # ######todo
                 # if '3535056297_e16f014cb7' in filename:
